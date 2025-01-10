@@ -1,0 +1,91 @@
+class Product:
+    def __init__(self, name, stock, low_stock_threshold):
+        self.name = name
+        self.stock = stock
+        self.low_stock_threshold = low_stock_threshold
+
+    def update_stock(self, amount):
+        self.stock += amount
+        if self.stock < self.low_stock_threshold:
+            print(f"Warning: {self.name} is low on stock ({self.stock} units left).")
+        elif self.stock <= 0:
+            print(f"Alert: {self.name} is out of stock!")
+
+    def check_availability(self):
+        return self.stock > 0
+
+    def __str__(self):
+        return f"{self.name}: {self.stock} units available"
+
+
+class Order:
+    def __init__(self, order_id, product, quantity):
+        self.order_id = order_id
+        self.product = product
+        self.quantity = quantity
+        self.status = "Pending"
+
+    def process_order(self):
+        if self.product.stock >= self.quantity:
+            self.product.update_stock(-self.quantity)
+            self.status = "Fulfilled"
+            print(f"Order {self.order_id} has been fulfilled.")
+        else:
+            self.status = "Failed"
+            print(f"Order {self.order_id} failed due to insufficient stock.")
+
+    def __str__(self):
+        return f"Order {self.order_id}: {self.quantity} x {self.product.name} ({self.status})"
+
+
+class StockManager:
+    def __init__(self):
+        self.products = {}
+
+    def add_product(self, name, stock, low_stock_threshold):
+        if name not in self.products:
+            self.products[name] = Product(name, stock, low_stock_threshold)
+            print(f"Product {name} added with {stock} units.")
+        else:
+            print(f"Product {name} already exists.")
+
+    def update_stock(self, name, amount):
+        if name in self.products:
+            self.products[name].update_stock(amount)
+        else:
+            print(f"Product {name} not found.")
+
+    def view_stock(self):
+        for product in self.products.values():
+            print(product)
+
+
+# Example usage
+if __name__ == "__main__":
+    manager = StockManager()
+
+    # Adding products
+    manager.add_product("Laptop", 50, 10)
+    manager.add_product("Phone", 30, 5)
+
+    # Viewing stock
+    print("\nCurrent Stock:")
+    manager.view_stock()
+
+    # Creating and processing orders
+    laptop = manager.products["Laptop"]
+    phone = manager.products["Phone"]
+
+    order1 = Order(1, laptop, 5)
+    order1.process_order()
+
+    order2 = Order(2, phone, 40)  # Should fail due to insufficient stock
+    order2.process_order()
+
+    # Updating stock
+    print("\nRestocking...")
+    manager.update_stock("Phone", 20)
+
+    # Viewing updated stock
+    print("\nUpdated Stock:")
+    manager.view_stock()
